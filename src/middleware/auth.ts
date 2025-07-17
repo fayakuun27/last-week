@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
+import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -13,39 +13,27 @@ interface JwtPayload {
 declare global {
   namespace Express {
     interface Request {
-      user?: JwtPayload;
+      user?: JwtPayload & { id: number; email: string; role: string };
     }
   }
 }
 
-// Middleware untuk autentikasi token
-export function authenticateToken(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+export function authenticateToken (req: Request, res: Response, next: NextFunction){
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'Unauthorized' });
 
-  if (!token) {
-    return res.status(401).json({ error: "Unauthorized - Token missing" });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-    req.user = decoded;
+  jwt.verify(token, process.env.JWT_SECRET as string, (err, user) => {
+    if (err) return res.status(403).json({ error: 'Forbidden' });
+    req.user = user as JwtPayload;
     next();
-  } catch (err) {
-    return res.status(403).json({ error: "Forbidden - Invalid token" });
-  }
+  });
 }
 
-// Middleware untuk cek role (contoh: hanya admin boleh akses)
 export function authorizeRole(...roles: string[]) {
   return (req: Request, res: Response, next: NextFunction) => {
-    const userRole = req.user?.role;
-    if (!userRole || !roles.includes(userRole)) {
-      return res.status(403).json({ error: "Forbidden - Role not allowed" });
+    if (!roles.includes(req.user?.role || '')) {
+      return res.status(403).json({ error: 'Forbidden - Role not allowed' });
     }
     next();
   };

@@ -6,16 +6,14 @@ import orderRoutes from './routes/order';
 import pointRoutes from './routes/point';
 import { corsMiddleware } from './middleware/cors';
 import { limiter } from './middleware/rateLimit';
-import path from 'path';
 
 dotenv.config();
 
 const app: Application = express();
 app.use(limiter)
 app.use(corsMiddleware);
-app.use(express.urlencoded({ extended: true }))
 app.use(express.json());
-app.use("/uploadProduct", express.static(path.join(__dirname, "uploadProduct")));
+app.use('/uploads', express.static('uploads'));
 
 app.use('/auth', authRoutes);
 app.use('/products', productRoutes);

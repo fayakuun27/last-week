@@ -39,18 +39,10 @@ export const login = async (req: Request, res: Response): Promise<any> => {
 
   try {
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email }, // ✅ email sudah pasti string
     });
 
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    // ✅ Verifikasi password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ error: "Invalid password" });
-    }
+    if (!user) return res.status(404).json({ error: "User not found" });
 
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },

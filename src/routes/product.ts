@@ -6,7 +6,6 @@ import {
   softDeleteProduct,
   restoreProduct,
   getDeletedProducts,
-  getProductById,
 } from "../controllers/product";
 import { authenticateToken, authorizeRole } from "../middleware/auth";
 import { upload } from "../middleware/upload";
@@ -46,6 +45,5 @@ router.get(
   authorizeRole("ADMIN"),
   getDeletedProducts
 );
-router.get("/:id", authenticateToken, authorizeRole("ADMIN"), getProductById);
 
 export default router;
