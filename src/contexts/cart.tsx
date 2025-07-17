@@ -9,22 +9,26 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<Products[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const addToCart = (products: Products) => {
+  const addToCart = (product: Products) => {
     setCart((prev) => {
-      const exist = prev.find((item) => item.id === products.id);
+      const exist = prev.find((item) => item.id === product.id);
       if (exist) {
         return prev.map((item) =>
-          item.id === products.id ? { ...item, inCart: item.inCart + 1 } : item
+          item.id === product.id
+            ? { ...item, quantity: (item.quantity ?? 1) + 1 }
+            : item
         );
       }
-      return [...prev, { ...products, inCart: 1 }];
+      return [...prev, { ...product, quantity: 1 }];
     });
   };
 
   const increaseQuantity = (productId: number) => {
     setCart((prev) =>
       prev.map((item) =>
-        item.id === productId ? { ...item, inCart: item.inCart + 1 } : item
+        item.id === productId
+          ? { ...item, quantity: (item.quantity ?? 1) + 1 }
+          : item
       )
     );
   };
@@ -32,8 +36,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const decreaseQuantity = (productId: number) => {
     setCart((prev) =>
       prev.map((item) =>
-        item.id === productId && item.inCart > 1
-          ? { ...item, inCart: item.inCart - 1 }
+        item.id === productId && (item.quantity ?? 1) > 1
+          ? { ...item, quantity: (item.quantity ?? 1) - 1 }
           : item
       )
     );
@@ -46,6 +50,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     }, 1000);
   };
+
   const clearCart = () => {
     setCart([]);
   };

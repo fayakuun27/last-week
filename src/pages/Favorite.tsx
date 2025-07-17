@@ -5,12 +5,11 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 const Favorite = () => {
-  const { cart, removeFromCart, loading, clearCart } = useCart();
+  const { cart, removeFromCart, loading } = useCart();
   const MySwal = withReactContent(Swal);
-  const navigate = useNavigate();
+
   const handleRemoveCart = async (productId: number) => {
     const result = await MySwal.fire({
       title: "Are you sure?",
@@ -34,31 +33,40 @@ const Favorite = () => {
       });
     }
   };
-  const handlePlaceOrder = async () => {
-    const token = localStorage.getItem("token");
-    const items = cart.map((item) => ({
-      productId: item.id,
-      quantity: item.quantity ?? 1,
-    }));
 
-    console.log(items);
+  const handleOrderProduct = async (
+    productId: number,
+    quantity: number = 1
+  ) => {
+    const token = localStorage.getItem("token");
 
     try {
       await axios.post(
         "http://localhost:3000/orders",
-        { items },
+        { productId, quantity },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      alert("Order berhasil!");
-      clearCart(); // kosongkan cart
-      navigate("/my-orders"); // arahkan ke halaman My Orders
+
+      MySwal.fire({
+        icon: "success",
+        title: "Success!",
+        text: "Your order has been placed.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+
+      removeFromCart(productId); // Optional: Remove dari cart setelah order
     } catch (err) {
-      console.error("Gagal order:", err);
-      alert("Gagal membuat order");
+      console.error("Order failed:", err);
+      MySwal.fire({
+        icon: "error",
+        title: "Failed!",
+        text: "Failed to place order.",
+      });
     }
   };
 
@@ -79,16 +87,17 @@ const Favorite = () => {
             </p>
           </div>
         )}
+
         {cart.length === 0 ? (
           <p className="text-center text-gray-500 text-lg">
             No items in your favorites list.
           </p>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {cart.map((item) => (
               <div
                 key={item.id}
-                className="items-center justify-center border rounded-lg shadow-md p-4 bg-white hover:shadow-lg transition duration-300"
+                className="flex flex-col justify-between border rounded-lg shadow-md p-4 bg-white hover:shadow-lg transition duration-300"
               >
                 <img
                   src={`http://localhost:3000/uploadProduct/${encodeURIComponent(
@@ -101,21 +110,26 @@ const Favorite = () => {
                   {item.name}
                 </h2>
                 <QuantitySelector productId={item.id} />
-                <button
-                  onClick={() => handleRemoveCart(item.id)}
-                  className="mt-5 w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 transition"
-                >
-                  Remove
-                </button>
+                <div className="mt-4 flex flex-col gap-2">
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleRemoveCart(item.id)}
+                  >
+                    Remove
+                  </Button>
+                  <Button
+                    variant="default"
+                    onClick={() =>
+                      handleOrderProduct(item.id, item.quantity ?? 1)
+                    }
+                  >
+                    Order Now
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
         )}
-      </div>
-      <div className="flex justify-end mt-4">
-        <Button onClick={handlePlaceOrder} disabled={cart.length === 0}>
-          Place Order
-        </Button>
       </div>
     </>
   );

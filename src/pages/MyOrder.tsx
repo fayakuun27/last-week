@@ -40,6 +40,8 @@ export default function MyOrdersPage() {
         setLoading(false);
       }
     };
+
+    fetchOrders(); // ⬅️ INI YANG KURANG DIPANGGIL
   }, []);
 
   if (loading) return <div className="text-center mt-10">Loading...</div>;
@@ -58,7 +60,7 @@ export default function MyOrdersPage() {
               {new Date(order.createdAt).toLocaleString()}
             </div>
             <ul className="list-disc ml-6 space-y-1">
-              {order.orderItems.map((item) => (
+              {order.orderItems?.map((item) => (
                 <li key={item.id}>
                   {item.product.name} × {item.quantity} (
                   {item.product.price.toLocaleString("id-ID")} IDR)
