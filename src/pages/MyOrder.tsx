@@ -1,20 +1,17 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-interface OrderItem {
+interface Product {
   id: number;
-  quantity: number;
-  product: {
-    id: number;
-    name: string;
-    price: number;
-  };
+  name: string;
+  price: number;
 }
 
 interface Order {
   id: number;
   createdAt: string;
-  orderItems: OrderItem[];
+  quantity: number;
+  product: Product;
 }
 
 export default function MyOrdersPage() {
@@ -31,44 +28,60 @@ export default function MyOrdersPage() {
           },
         });
 
-        if (res) {
-          setOrders(res.data);
-        }
+        console.log("Fetched orders:", res.data);
+        setOrders(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error("Gagal mengambil data order:", err);
+        setOrders([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchOrders(); // ⬅️ INI YANG KURANG DIPANGGIL
+    fetchOrders();
   }, []);
 
   if (loading) return <div className="text-center mt-10">Loading...</div>;
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-bold mb-4">🧾 My Orders</h1>
+    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+      <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
+        🧾 My Orders
+      </h1>
 
       {orders.length === 0 ? (
-        <p className="text-gray-500">Kamu belum memiliki order.</p>
+        <p className="text-center text-gray-500">Kamu belum memiliki order.</p>
       ) : (
-        orders.map((order) => (
-          <div key={order.id} className="border p-4 rounded-md shadow">
-            <div className="font-semibold text-lg">Order #{order.id}</div>
-            <div className="text-sm text-gray-500 mb-2">
-              {new Date(order.createdAt).toLocaleString()}
+        orders.map((order) => {
+          const total = order.product.price * order.quantity;
+
+          return (
+            <div
+              key={order.id}
+              className="border border-gray-300 p-6 rounded-lg shadow-md bg-white"
+            >
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="font-semibold text-lg text-gray-800">
+                  Order #{order.id}
+                </h2>
+                <span className="text-sm text-gray-500">
+                  {new Date(order.createdAt).toLocaleString("id-ID")}
+                </span>
+              </div>
+
+              <div className="text-gray-800">
+                {order.product.name} × {order.quantity}
+              </div>
+              <div className="text-sm text-gray-500 mb-1">
+                Harga satuan: {order.product.price.toLocaleString("id-ID")} IDR
+              </div>
+
+              <div className="mt-2 font-bold text-right text-blue-700">
+                Total: {total.toLocaleString("id-ID")} IDR
+              </div>
             </div>
-            <ul className="list-disc ml-6 space-y-1">
-              {order.orderItems?.map((item) => (
-                <li key={item.id}>
-                  {item.product.name} × {item.quantity} (
-                  {item.product.price.toLocaleString("id-ID")} IDR)
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))
+          );
+        })
       )}
     </div>
   );
