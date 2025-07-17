@@ -1,32 +1,30 @@
-import { useCart } from "@/contexts/cart";
+interface QuantitySelectorProps {
+  productId: number;
+  quantity: number;
+  onQuantityChange: (newQty: number) => void;
+}
 
-type Props = {
-    productId: number;
-};
-
-const QuantitySelector = ({ productId }: Props) => {
-    const { cart, increaseQuantity, decreaseQuantity } = useCart()
-    const item = cart.find((p) => p.id === productId);
-    const quantity = item?.inCart || 0;
-
-    return (
-        <div className="flex items-center justify-center space-x-4 mt-2">
-            <button
-                onClick={() => decreaseQuantity(productId)}
-                className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-lg font-bold"
-                disabled={quantity <= 1}
-            >
-                -
-            </button>
-            <span className="min-w-[32px] text-center font-semibold text-lg">{quantity}</span>
-            <button
-                onClick={() => increaseQuantity(productId)}
-                className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-lg font-bold"
-            >
-                +
-            </button>
-        </div>
-    );
+const QuantitySelector = ({
+  quantity,
+  onQuantityChange,
+}: QuantitySelectorProps) => {
+  return (
+    <div className="flex items-center gap-2 justify-center">
+      <button
+        className="px-3 py-1 bg-gray-200 rounded"
+        onClick={() => onQuantityChange(Math.max(1, quantity - 1))}
+      >
+        -
+      </button>
+      <span className="px-2">{quantity}</span>
+      <button
+        className="px-3 py-1 bg-gray-200 rounded"
+        onClick={() => onQuantityChange(quantity + 1)}
+      >
+        +
+      </button>
+    </div>
+  );
 };
 
 export default QuantitySelector;

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 
 const Favorite = () => {
-  const { cart, removeFromCart, loading } = useCart();
+  const { cart, removeFromCart, loading, updateCartQuantity } = useCart();
   const MySwal = withReactContent(Swal);
 
   const handleRemoveCart = async (productId: number) => {
@@ -109,7 +109,11 @@ const Favorite = () => {
                 <h2 className="font-bold text-lg text-center mb-1">
                   {item.name}
                 </h2>
-                <QuantitySelector productId={item.id} />
+                <QuantitySelector
+                  productId={item.id}
+                  quantity={item.quantity}
+                  onQuantityChange={(qty) => updateCartQuantity(item.id, qty)}
+                />
                 <div className="mt-4 flex flex-col gap-2">
                   <Button
                     variant="destructive"

@@ -54,7 +54,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const clearCart = () => {
     setCart([]);
   };
-
+  const updateCartQuantity = (productId: number, quantity: number) => {
+    setCart((prevCart) =>
+      prevCart.map((item) =>
+        item.id === productId ? { ...item, quantity } : item
+      )
+    );
+  };
   return (
     <CartContext.Provider
       value={{
@@ -65,6 +71,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         increaseQuantity,
         decreaseQuantity,
         clearCart,
+        updateCartQuantity,
       }}
     >
       {children}

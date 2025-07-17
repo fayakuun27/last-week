@@ -8,4 +8,5 @@ export type Cart = {
   decreaseQuantity: (productId: number) => void;
   loading: boolean;
   clearCart: () => void;
+  updateCartQuantity: (productId: number, quantity: number) => void;
 };
